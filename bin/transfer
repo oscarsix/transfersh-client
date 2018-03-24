@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import tempfile
 from pathlib import Path
 import sys
 from transfersh_client import TransfershClient
@@ -19,10 +20,13 @@ elif etc_transfershrc.is_file():
     config = yaml.load(etc_transfershrc.read_text())
 
 argparse_server_required = True if config is None else False
+argparse_files_required = True if sys.stdin.isatty() else False
+
 
 parser = argparse.ArgumentParser(description='Transfersh client.')
 parser.add_argument('--verbose', '-v', action='count')
-parser.add_argument('files', metavar='F', nargs='+', help="Files for upload")
+if argparse_files_required:
+    parser.add_argument('files', metavar='F', nargs='+', help="Files for upload")
 parser.add_argument('--server', help='Transfersh server url', required=argparse_server_required)
 parser.add_argument('-d', '--max-downloads', help='Max possible downloads', required=False, default=100)
 parser.add_argument('-t', '--max-days', help='Max days saved', required=False, default=30)
@@ -37,10 +41,22 @@ def stderrprint(*printargs, **kwargs):
     print(*printargs, file=sys.stderr, **kwargs)
 
 
-results = transfersh_client.upload(
-    files=args.files,
-    max_downloads=args.max_downloads,
-    max_days=args.max_days)
+results= list()
+if sys.stdin.isatty():
+    results = transfersh_client.upload(
+        files=args.files,
+        max_downloads=args.max_downloads,
+        max_days=args.max_days)
+else:
+    with tempfile.NamedTemporaryFile() as tmpfile:
+        print(tmpfile.name)
+        input_from_pipe = sys.stdin.read()
+        tmpfile.write(str.encode(input_from_pipe))
+        tmpfile.flush()
+        results= transfersh_client.upload(
+            files=[tmpfile.name],
+            max_downloads=args.max_downloads,
+            max_days=args.max_days)
 
 for result in results:
     print(result['text'])
