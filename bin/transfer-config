@@ -1,0 +1,6 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+
+transfersh_server = input("Please enter a transfersh server url : ")
+Path(str(Path.home()) + '/.transfersh/config.yaml').write_text("---\nserver: '" + transfersh_server + "'")
