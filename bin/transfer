@@ -3,6 +3,7 @@
 import argparse
 import tempfile
 from pathlib import Path
+import requests
 import sys
 from transfersh_client import TransfershClient
 from transfersh_client import __VERSION__
@@ -54,7 +55,10 @@ else:
         results = transfersh_client.upload(files=[tmpfile.name])
 
 for result in results:
-    if 'password' in result:
-        print(result['text'] + ' (' + result['password'] + ')')
-    else:
-        print(result['text'])
+    if isinstance(result['result'], str):
+        print(result['result'])
+    if isinstance(result['result'], requests.Response):
+        if 'password' in result:
+            print(result['result'].text + ' (' + result['password'] + ')')
+        else:
+            print(result['result'].text)

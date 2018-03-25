@@ -8,6 +8,7 @@ import subprocess
 import tarfile
 import tempfile
 
+
 class TransfershClientError(Exception):
     pass
 
@@ -32,64 +33,47 @@ class TransfershClient:
     def upload_file(self, file, filename):
         headers = {
             'Max-Downloads': str(self.config['args'].max_downloads),
-            'Max-Days': str(self.config['args'].max_days)
-        }
-        files = {
-            'file': (
-                filename,
-                open(str(file), 'rb')
-            )
-        }
+            'Max-Days': str(self.config['args'].max_days)}
+
+        files = {'file': (filename, open(str(file), 'rb'))}
         result = requests.post(self.config['server'], files=files, headers=headers)
+
         if 400 <= result.status_code < 600:
             raise TransfershServerStatusCodeError(str(result.status_code))
+
         return result
 
     def upload(self, **kwargs):
         files_or_dirs = kwargs.get('files')
         results = list()
+
         for file_or_dir in files_or_dirs:
             absolute_file = Path(file_or_dir).resolve()
             p = Path(absolute_file)
+            password = None
+
             if p.is_file():
                 if self.config['args'].encrypt:
                     result, password = self.symmetric_encrypted_upload_file(absolute_file, p.name)
-                    results.append({
-                        'status_code': result.status_code,
-                        'text': result.text,
-                        'result': result,
-                        'password': password
-                    })
                 else:
                     result = self.upload_file(absolute_file, p.name)
-                    results.append({
-                        'status_code': result.status_code,
-                        'text': result.text,
-                        'result': result
-                    })
             elif p.is_dir():
                 with tempfile.NamedTemporaryFile() as tmpfile:
                     with tarfile.open(tmpfile.name, "w:gz") as tar:
                         tar.add(absolute_file, arcname=p.name)
+
                     if self.config['args'].encrypt:
                         result, password = self.symmetric_encrypted_upload_file(tmpfile.name, p.name + '.tar.gz')
-                        results.append({
-                            'status_code': result.status_code,
-                            'text': result.text,
-                            'result': result,
-                            'password': password
-                        })
                     else:
                         result = self.upload_file(tmpfile.name, p.name + '.tar.gz')
-                        results.append({
-                            'status_code': result.status_code,
-                            'text': result.text,
-                            'result': result
-                        })
             else:
-                results.append({
-                    'text': 'WARNING: File ' + str(absolute_file) + ' not exist'
-                })
+                result = 'WARNING: File ' + str(absolute_file) + ' not exist'
+
+            results.append({
+                'result': result,
+                'password': password
+            })
+
         return results
 
     def symmetric_encrypted_upload_file(self, file, filename):
