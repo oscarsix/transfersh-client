@@ -1,4 +1,4 @@
-__VERSION__ = '1.0.0'
+__VERSION__ = '1.0.1'
 
 from pathlib import Path
 import requests
