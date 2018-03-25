@@ -1,4 +1,4 @@
-__VERSION__ = '1.1.1'
+__VERSION__ = '1.1.4'
 
 from pathlib import Path
 import random
@@ -60,7 +60,7 @@ class TransfershClient:
             elif p.is_dir():
                 with tempfile.NamedTemporaryFile() as tmpfile:
                     with tarfile.open(tmpfile.name, "w:gz") as tar:
-                        tar.add(absolute_file, arcname=p.name)
+                        tar.add(str(absolute_file))
 
                     if self.config['args'].encrypt:
                         result, password = self.symmetric_encrypted_upload_file(tmpfile.name, p.name + '.tar.gz')
@@ -79,7 +79,7 @@ class TransfershClient:
     def symmetric_encrypted_upload_file(self, file, filename):
         password = self.randompassword()
         with tempfile.NamedTemporaryFile() as tmpfile:
-            subprocess.check_output(['gpg', '--symmetric', '--armor', '--batch',
+            subprocess.check_output(['gpg', '--symmetric', '--armor', '--batch', '--no-tty',
                                      '--yes', '--passphrase', password, '-o', tmpfile.name, str(file)])
             result = self.upload_file(Path(tmpfile.name).resolve(), filename + '.asc')
             return result, password

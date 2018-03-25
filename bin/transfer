@@ -58,7 +58,7 @@ for result in results:
     if isinstance(result['result'], str):
         print(result['result'])
     if isinstance(result['result'], requests.Response):
-        if 'password' in result:
+        if 'password' in result and result['password'] is not None:
             print(result['result'].text + ' (' + result['password'] + ')')
         else:
             print(result['result'].text)
