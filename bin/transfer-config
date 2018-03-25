@@ -3,4 +3,9 @@
 from pathlib import Path
 
 transfersh_server = input("Please enter a transfersh server url : ")
-Path(str(Path.home()) + '/.transfersh/config.yaml').write_text("---\nserver: '" + transfersh_server + "'")
+
+transfersh_dir = Path.home().joinpath('.transfersh')
+if not transfersh_dir.exists():
+    transfersh_dir.mkdir()
+
+transfersh_dir.joinpath('config.yaml').write_text("---\nserver: '" + transfersh_server + "'\n")
