@@ -2,6 +2,7 @@
 
 Command line tool for Transfer.sh server.
 
+[![PyPI version](https://badge.fury.io/py/transfershclient.svg)](https://badge.fury.io/py/transfershclient)
 
 ## Configutation file
 
