@@ -49,9 +49,7 @@ if sys.stdin.isatty():
         max_days=args.max_days)
 else:
     with tempfile.NamedTemporaryFile() as tmpfile:
-        print(tmpfile.name)
-        input_from_pipe = sys.stdin.read()
-        tmpfile.write(str.encode(input_from_pipe))
+        tmpfile.write(str.encode(sys.stdin.read()))
         tmpfile.flush()
         results= transfersh_client.upload(
             files=[tmpfile.name],
