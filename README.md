@@ -2,28 +2,44 @@
 
 Command line tool for Transfer.sh server.
 
-It read a configuration yaml file:
+
+## Configutation file
+
+You can set the transfersh server url in a configuration file:
+
 > User level: `$HOME/.transfersh/config.yaml`
 
 > System level: `/etc/transfersh/config.yaml`
 
+    ---
+    server: 'https://transfer.sh'
+
+## Install
+
+    pip install transferclient
+
+## Usage
 
     usage: transfer [-h] [--verbose] [--server SERVER] [-d MAX_DOWNLOADS] [-t MAX_DAYS] F [F ...]
 
     Transfersh client.
 
     positional arguments:
-    F                     Files for upload
+    F                         Files for upload
 
     optional arguments:
-    -h, --help            show this help message and exit
+    -h, --help                show this help message and exit
     -v, --verbose
-    --server SERVER       Transfersh server url
+    --server SERVER           Transfersh server url
     -d MAX_DOWNLOADS, --max-downloads MAX_DOWNLOADS
-                          Max possible downloads
+                              Max possible downloads
     -t MAX_DAYS, --max-days MAX_DAYS
-                          Max days saved
+                              Max days saved
 
-## Usage
+### From TTY
 
-    pip install transfershclient
+    transfer ./testfile.txt ./testdir
+
+### From PIPE
+
+    cat /var/log/syslog | transfer
