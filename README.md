@@ -35,6 +35,7 @@ You can set the transfersh server url in a configuration file:
                               Max possible downloads
     -t MAX_DAYS, --max-days MAX_DAYS
                               Max days saved
+     -e, --encrypt            symmetric gpg encryted upload
 
 ### From TTY
 

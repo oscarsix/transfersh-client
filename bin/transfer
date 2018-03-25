@@ -5,6 +5,7 @@ import tempfile
 from pathlib import Path
 import sys
 from transfersh_client import TransfershClient
+from transfersh_client import __VERSION__
 import yaml
 
 verbose = 0
@@ -22,15 +23,17 @@ elif etc_transfershrc.is_file():
 argparse_server_required = True if config is None else False
 argparse_files_required = True if sys.stdin.isatty() else False
 
-
 parser = argparse.ArgumentParser(description='Transfersh client.')
+parser.add_argument('--version', action='version', version='%(prog)s ' + __VERSION__)
 parser.add_argument('--verbose', '-v', action='count')
 if argparse_files_required:
     parser.add_argument('files', metavar='F', nargs='+', help="Files for upload")
 parser.add_argument('--server', help='Transfersh server url', required=argparse_server_required)
 parser.add_argument('-d', '--max-downloads', help='Max possible downloads', required=False, default=100)
 parser.add_argument('-t', '--max-days', help='Max days saved', required=False, default=30)
+parser.add_argument('-e', '--encrypt', help='symmetric gpg encryted upload', action='count')
 args = parser.parse_args()
+config['args'] = args
 
 if args.server:
     config['server'] = args.server
@@ -43,18 +46,15 @@ def stderrprint(*printargs, **kwargs):
 
 results = list()
 if sys.stdin.isatty():
-    results = transfersh_client.upload(
-        files=args.files,
-        max_downloads=args.max_downloads,
-        max_days=args.max_days)
+    results = transfersh_client.upload(files=args.files)
 else:
     with tempfile.NamedTemporaryFile() as tmpfile:
         tmpfile.write(str.encode(sys.stdin.read()))
         tmpfile.flush()
-        results = transfersh_client.upload(
-            files=[tmpfile.name],
-            max_downloads=args.max_downloads,
-            max_days=args.max_days)
+        results = transfersh_client.upload(files=[tmpfile.name])
 
 for result in results:
-    print(result['text'])
+    if 'password' in result:
+        print(result['text'] + ' (' + result['password'] + ')')
+    else:
+        print(result['text'])
