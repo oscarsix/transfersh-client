@@ -41,7 +41,7 @@ def stderrprint(*printargs, **kwargs):
     print(*printargs, file=sys.stderr, **kwargs)
 
 
-results= list()
+results = list()
 if sys.stdin.isatty():
     results = transfersh_client.upload(
         files=args.files,
@@ -51,7 +51,7 @@ else:
     with tempfile.NamedTemporaryFile() as tmpfile:
         tmpfile.write(str.encode(sys.stdin.read()))
         tmpfile.flush()
-        results= transfersh_client.upload(
+        results = transfersh_client.upload(
             files=[tmpfile.name],
             max_downloads=args.max_downloads,
             max_days=args.max_days)
