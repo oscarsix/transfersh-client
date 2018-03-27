@@ -10,6 +10,11 @@ from transfersh_client import TransfershClient
 from transfersh_client import __VERSION__
 import yaml
 
+
+def stderrprint(*printargs, **kwargs):
+    print(*printargs, file=sys.stderr, **kwargs)
+
+
 verbose = 0
 config = None
 files_or_dirs = list()
@@ -43,11 +48,6 @@ transfersh_client = TransfershClient(
     server_url=config['server'],
     max_days=args.max_days,
     max_downloads=args.max_downloads)
-
-
-def stderrprint(*printargs, **kwargs):
-    print(*printargs, file=sys.stderr, **kwargs)
-
 
 results = list()
 if sys.stdin.isatty():
