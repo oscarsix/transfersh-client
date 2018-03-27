@@ -9,51 +9,40 @@ import tarfile
 import tempfile
 
 
-class TransfershClientError(Exception):
-    pass
-
-
-class TransfershClientConfigError(TransfershClientError):
-    def __init__(self, message):
-        self.message = message
-
-
-class TransfershServerStatusCodeError(TransfershClientError):
-    def __init__(self, message):
-        self.message = message
-
-
 class TransfershClient:
-    def __init__(self, config):
-        try:
-            self.config = config
-        except Exception as e:
-            raise TransfershClientConfigError('Missing config parameter: ' + str(e))
 
-    def upload_file(self, file, filename):
+    def __init__(self, **kwargs):
+        self.server_url = kwargs.get('server_url')
+        self.max_downloads = kwargs.get('max_downloads', 1000)
+        self.max_days = kwargs.get('max_days', 1000)
+
+    def upload_file(self, file, filename=None):
         headers = {
-            'Max-Downloads': str(self.config['args'].max_downloads),
-            'Max-Days': str(self.config['args'].max_days)}
+            'Max-Downloads': str(self.max_downloads),
+            'Max-Days': str(self.max_days)}
 
-        files = {'file': (filename, open(str(file), 'rb'))}
-        result = requests.post(self.config['server'], files=files, headers=headers)
+        f = {'file': (filename, open(str(file), 'rb'))}
+        result = requests.post(self.server_url, files=f, headers=headers)
 
         if 400 <= result.status_code < 600:
-            raise TransfershServerStatusCodeError(str(result.status_code))
+            raise Exception('status_code = ' + str(result.status_code))
 
         return result
 
     def upload(self, **kwargs):
         files_or_dirs = kwargs.get('files')
+        encrypt = kwargs.get('encrypt', False)
+
         results = list()
 
         for file_or_dir in files_or_dirs:
+
             absolute_file = Path(file_or_dir).resolve()
             p = Path(absolute_file)
             password = None
 
             if p.is_file():
-                if self.config['args'].encrypt:
+                if encrypt:
                     result, password = self.symmetric_encrypted_upload_file(absolute_file, p.name)
                 else:
                     result = self.upload_file(absolute_file, p.name)
@@ -62,7 +51,7 @@ class TransfershClient:
                     with tarfile.open(tmpfile.name, "w:gz") as tar:
                         tar.add(str(absolute_file))
 
-                    if self.config['args'].encrypt:
+                    if encrypt:
                         result, password = self.symmetric_encrypted_upload_file(tmpfile.name, p.name + '.tar.gz')
                     else:
                         result = self.upload_file(tmpfile.name, p.name + '.tar.gz')
