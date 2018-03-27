@@ -3,6 +3,7 @@ __VERSION__ = '1.1.6'
 from pathlib import Path
 import random
 import requests
+import shutil
 import string
 import subprocess
 import tarfile
@@ -15,6 +16,8 @@ class TransfershClient:
         self.server_url = kwargs.get('server_url')
         self.max_downloads = kwargs.get('max_downloads', 1000)
         self.max_days = kwargs.get('max_days', 1000)
+        self.gpg_binary = kwargs.get('gpg_binary', 'gpg')
+        self.gpg_options = kwargs.get('gpg_options', ['--symmetric', '--armor', '--batch', '--no-tty', '--yes'])
 
     def upload_file(self, file, filename=None):
         headers = {
@@ -32,6 +35,9 @@ class TransfershClient:
     def upload(self, **kwargs):
         files_or_dirs = kwargs.get('files')
         encrypt = kwargs.get('encrypt', False)
+
+        if encrypt and shutil.which(self.gpg_binary) is None:
+            raise Exception('gpg not found')
 
         results = list()
 
@@ -68,8 +74,7 @@ class TransfershClient:
     def symmetric_encrypted_upload_file(self, file, filename):
         password = self.randompassword()
         with tempfile.NamedTemporaryFile() as tmpfile:
-            subprocess.check_output(['gpg', '--symmetric', '--armor', '--batch', '--no-tty',
-                                     '--yes', '--passphrase', password, '-o', tmpfile.name, str(file)])
+            subprocess.check_output([self.gpg_binary] + self.gpg_options + ['--passphrase', password, '-o', tmpfile.name, str(file)])
             result = self.upload_file(Path(tmpfile.name).resolve(), filename + '.asc')
             return result, password
 

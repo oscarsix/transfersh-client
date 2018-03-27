@@ -44,29 +44,34 @@ args = parser.parse_args()
 if args.server:
     config['server'] = args.server
 
-transfersh_client = TransfershClient(
-    server_url=config['server'],
-    max_days=args.max_days,
-    max_downloads=args.max_downloads)
 
-results = list()
-if sys.stdin.isatty():
-    results = transfersh_client.upload(
-        files=args.files,
-        encrypt=False if args.encrypt is None else True)
-else:
-    with tempfile.NamedTemporaryFile() as tmpfile:
-        tmpfile.write(str.encode(sys.stdin.read()))
-        tmpfile.flush()
+try:
+    transfersh_client = TransfershClient(
+        server_url=config['server'],
+        max_days=args.max_days,
+        max_downloads=args.max_downloads)
+
+    results = list()
+    if sys.stdin.isatty():
         results = transfersh_client.upload(
-            files=[tmpfile.name],
-            encrypt=True if args.encrypt > 0 else False)
+            files=args.files,
+            encrypt=False if args.encrypt is None else True)
+    else:
+        with tempfile.NamedTemporaryFile() as tmpfile:
+            tmpfile.write(str.encode(sys.stdin.read()))
+            tmpfile.flush()
+            results = transfersh_client.upload(
+                files=[tmpfile.name],
+                encrypt=True if args.encrypt > 0 else False)
 
-for result in results:
-    if isinstance(result['result'], str):
-        print(result['result'])
-    if isinstance(result['result'], requests.Response):
-        if 'password' in result and result['password'] is not None:
-            print(result['result'].text + ' (' + result['password'] + ')')
-        else:
-            print(result['result'].text)
+    for result in results:
+        if isinstance(result['result'], str):
+            print(result['result'])
+        if isinstance(result['result'], requests.Response):
+            if 'password' in result and result['password'] is not None:
+                print(result['result'].text + ' (' + result['password'] + ')')
+            else:
+                print(result['result'].text)
+except Exception as e:
+    stderrprint('ERROR: ' + str(e))
+    sys.exit(1)
