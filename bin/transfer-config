@@ -2,14 +2,22 @@
 
 from pathlib import Path
 from os.path import expanduser
+import sys
 
+try:
+    transfersh_server = input("Please enter a transfersh server url : ")
+except KeyboardInterrupt:
+    sys.exit(0)
 
-transfersh_server = input("Please enter a transfersh server url : ")
-home = expanduser('~')
-transfersh_dir = home + '/.transfersh'
+try:
+    home = expanduser('~')
+    transfersh_dir = home + '/.transfersh'
 
-if not Path(transfersh_dir).exists():
-    Path(transfersh_dir).mkdir()
+    if not Path(transfersh_dir).exists():
+        Path(transfersh_dir).mkdir()
 
-with open(transfersh_dir + '/config.yaml', 'w') as out:
-    out.write("---\nserver: '" + transfersh_server + "'\n")
+    with open(transfersh_dir + '/config.yaml', 'w') as out:
+        out.write("---\nserver: '" + transfersh_server + "'\n")
+except Exception as e:
+    print('ERROR: ' + e, file=sys.stderr)
+    sys.exit(1)
