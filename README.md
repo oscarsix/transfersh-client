@@ -15,6 +15,12 @@ You can set the transfersh server url in a configuration file:
     ---
     server: 'https://transfer.sh'
 
+Use the helper script `transfer-config` to generate the user level config file.
+
+    $ transfer-config
+    $ Please enter a transfersh server url :
+
+
 ## Install
 
     pip install transferclient
