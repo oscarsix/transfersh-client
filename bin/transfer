@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+from os.path import expanduser
 import tempfile
 from pathlib import Path
 import requests
@@ -13,13 +14,13 @@ verbose = 0
 config = None
 files_or_dirs = list()
 
-home_transfershrc = Path.home().joinpath('.transfersh/config.yaml')
-etc_transfershrc = Path('/etc/transfersh/config.yaml')
+home_transfershrc =  expanduser('~') + '/.transfersh/config.yaml'
+etc_transfershrc = '/etc/transfersh/config.yaml'
 
-if home_transfershrc.is_file():
-    config = yaml.load(home_transfershrc.read_text())
-elif etc_transfershrc.is_file():
-    config = yaml.load(etc_transfershrc.read_text())
+if Path(home_transfershrc).is_file():
+    config = yaml.load(open(home_transfershrc, 'r'))
+elif Path(etc_transfershrc).is_file():
+    config = yaml.load(open(etc_transfershrc, 'r'))
 
 argparse_server_required = True if config is None else False
 argparse_files_required = True if sys.stdin.isatty() else False
