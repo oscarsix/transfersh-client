@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from os.path import expanduser
+
 
 transfersh_server = input("Please enter a transfersh server url : ")
+home = expanduser('~')
+transfersh_dir = home + '/.transfersh'
 
-transfersh_dir = Path.home().joinpath('.transfersh')
-if not transfersh_dir.exists():
-    transfersh_dir.mkdir()
+if not Path(transfersh_dir).exists():
+    Path(transfersh_dir).mkdir()
 
-transfersh_dir.joinpath('config.yaml').write_text("---\nserver: '" + transfersh_server + "'\n")
+with open(transfersh_dir + '/config.yaml', 'w') as out:
+    out.write("---\nserver: '" + transfersh_server + "'\n")
