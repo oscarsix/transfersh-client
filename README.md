@@ -8,12 +8,12 @@ Command line tool for Transfer.sh server.
 
 You can set the transfersh server url in a configuration file:
 
-> User level: `$HOME/.transfersh/config.yaml`
+> User level: `$HOME/.transfersh/config.cfg`
 
-> System level: `/etc/transfersh/config.yaml`
+> System level: `/etc/transfersh/config.cfg`
 
-    ---
-    server: 'https://transfer.sh'
+    [DEFAULT]
+    server = https://transfer.sh
 
 Use the helper script `transfer-config` to generate the user level config file.
 

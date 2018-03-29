@@ -1,4 +1,4 @@
-__VERSION__ = '1.1.6'
+__VERSION__ = '1.2.1'
 
 from pathlib import Path
 import random

@@ -19,5 +19,5 @@ setup(
         'bin/transfer-config'
     ],
     python_requires='>=3.4',
-    install_requires=['requests', 'PyYAML'],
+    install_requires=['requests'],
 )
